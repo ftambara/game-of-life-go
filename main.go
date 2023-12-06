@@ -74,6 +74,23 @@ func (b *Board) CountNeighbors(x, y int) int {
 	return count
 }
 
+func (b *Board) Equals(other *Board) bool {
+	if len(*b) != len(*other) {
+		return false
+	}
+	for y := range *b {
+		if len((*b)[y]) != len((*other)[y]) {
+			return false
+		}
+		for x := range (*b)[y] {
+			if (*b)[y][x] != (*other)[y][x] {
+				return false
+			}
+		}
+	}
+	return true
+}
+
 type CellState int
 
 const (
