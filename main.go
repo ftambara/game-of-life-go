@@ -41,7 +41,7 @@ func (b *Board) advance() *Board {
 	nextBoard := newBoard(len(*b))
 	for y := range *b {
 		for x := range (*b)[y] {
-			count := b.countNeighbors(x, y)
+			count := b.CountNeighbors(x, y)
 			nextBoard.set(x, y, next(b.at(x, y), count))
 		}
 	}
@@ -57,7 +57,7 @@ func (b *Board) print() {
 	}
 }
 
-func (b *Board) countNeighbors(x, y int) int {
+func (b *Board) CountNeighbors(x, y int) int {
 	count := 0
 	// Bound r and c with board edges
 	for xx := max(x-1, 0); xx <= min(x+1, len(*b)-1); xx++ {
