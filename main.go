@@ -1,22 +1,19 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"math/rand"
+)
 
 func main() {
-	board := Board{
-		{Off, Off, Off, Off},
-		{Off, Off, On, Off},
-		{Off, Off, On, Off},
-		{Off, Off, On, Off},
-		{Off, Off, Off, Off},
-	}
+	board := RandomBoard(8, 5)
 	board.print()
 	fmt.Print("\n\n")
 	for i := 0; i < 3; i++ {
 		nextBoard := board.advance()
 		nextBoard.print()
 		fmt.Print("\n\n")
-		board = *nextBoard
+		board = nextBoard
 	}
 }
 
@@ -29,6 +26,16 @@ func NewBoard(xSize, ySize int) *Board {
 		board[y], underlying = underlying[:xSize], underlying[xSize:]
 	}
 	return &board
+}
+
+func RandomBoard(xSize, ySize int) *Board {
+	board := NewBoard(xSize, ySize)
+	for y := range *board {
+		for x := range (*board)[y] {
+			(*board)[y][x] = CellState(rand.Intn(2))
+		}
+	}
+	return board
 }
 
 func (b *Board) at(x, y int) CellState {
