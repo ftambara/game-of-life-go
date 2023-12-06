@@ -15,6 +15,7 @@ func main() {
 		nextBoard := board.advance()
 		nextBoard.print()
 		fmt.Print("\n\n")
+		board = *nextBoard
 	}
 }
 
