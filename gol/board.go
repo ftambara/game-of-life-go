@@ -5,20 +5,24 @@ import (
 	"math/rand"
 )
 
-type Board [][]CellState
+type Board struct {
+	states [][]CellState
+	width  int
+	height int
+}
 
 func NewBoard(xSize, ySize int, fn func(int, int) CellState) *Board {
-	board := make(Board, ySize)
+	states := make([][]CellState, ySize)
 	underlying := make([]CellState, xSize*ySize)
-	for y := range board {
-		board[y], underlying = underlying[:xSize], underlying[xSize:]
+	for y := range states {
+		states[y], underlying = underlying[:xSize], underlying[xSize:]
 	}
-	for y := range board {
-		for x := range board[y] {
-			board[y][x] = fn(x, y)
+	for y := range states {
+		for x := range states[y] {
+			states[y][x] = fn(x, y)
 		}
 	}
-	return &board
+	return &Board{states, xSize, ySize}
 }
 
 func RandomBoard(xSize, ySize int) *Board {
@@ -31,19 +35,19 @@ func RandomBoard(xSize, ySize int) *Board {
 }
 
 func (b *Board) at(x, y int) CellState {
-	return (*b)[y][x]
+	return b.states[y][x]
 }
 
 func (b *Board) set(x, y int, s CellState) {
-	(*b)[y][x] = s
+	b.states[y][x] = s
 }
 
 func (b *Board) advance() *Board {
-	nextBoard := NewBoard(len((*b)[0]), len(*b), func(_, _ int) CellState {
+	nextBoard := NewBoard(b.width, b.height, func(_, _ int) CellState {
 		return Off
 	})
-	for y := range *b {
-		for x := range (*b)[y] {
+	for y := range b.states {
+		for x := range b.states[y] {
 			count := b.CountNeighbors(x, y)
 			nextBoard.set(x, y, next(b.at(x, y), count))
 		}
@@ -52,8 +56,8 @@ func (b *Board) advance() *Board {
 }
 
 func (b *Board) print() {
-	for y := range *b {
-		for x := range (*b)[y] {
+	for y := range b.states {
+		for x := range b.states[y] {
 			fmt.Printf("%v  ", b.at(x, y))
 		}
 		fmt.Print("\n\n")
@@ -63,8 +67,8 @@ func (b *Board) print() {
 func (b *Board) CountNeighbors(x, y int) int {
 	count := 0
 	// Bound r and c with board edges
-	for xx := max(x-1, 0); xx <= min(x+1, len((*b)[0])-1); xx++ {
-		for yy := max(y-1, 0); yy <= min(y+1, len(*b)-1); yy++ {
+	for xx := max(x-1, 0); xx <= min(x+1, b.width-1); xx++ {
+		for yy := max(y-1, 0); yy <= min(y+1, b.height-1); yy++ {
 			if xx == x && yy == y {
 				// Given cell, skip
 				continue
@@ -78,15 +82,12 @@ func (b *Board) CountNeighbors(x, y int) int {
 }
 
 func (b *Board) Equals(other *Board) bool {
-	if len(*b) != len(*other) {
+	if b.width != other.width || b.height != other.height {
 		return false
 	}
-	for y := range *b {
-		if len((*b)[y]) != len((*other)[y]) {
-			return false
-		}
-		for x := range (*b)[y] {
-			if (*b)[y][x] != (*other)[y][x] {
+	for y := range b.states {
+		for x := range b.states[y] {
+			if b.at(x, y) != other.at(x, y) {
 				return false
 			}
 		}
