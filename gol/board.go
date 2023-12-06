@@ -7,23 +7,27 @@ import (
 
 type Board [][]CellState
 
-func NewBoard(xSize, ySize int) *Board {
+func NewBoard(xSize, ySize int, fn func(int, int) CellState) *Board {
 	board := make(Board, ySize)
 	underlying := make([]CellState, xSize*ySize)
 	for y := range board {
 		board[y], underlying = underlying[:xSize], underlying[xSize:]
 	}
+	for y := range board {
+		for x := range board[y] {
+			board[y][x] = fn(x, y)
+		}
+	}
 	return &board
 }
 
 func RandomBoard(xSize, ySize int) *Board {
-	board := NewBoard(xSize, ySize)
-	for y := range *board {
-		for x := range (*board)[y] {
-			(*board)[y][x] = CellState(rand.Intn(2))
+	return NewBoard(xSize, ySize, func(_, _ int) CellState {
+		if rand.Intn(2) == 0 {
+			return On
 		}
-	}
-	return board
+		return Off
+	})
 }
 
 func (b *Board) at(x, y int) CellState {
@@ -35,7 +39,9 @@ func (b *Board) set(x, y int, s CellState) {
 }
 
 func (b *Board) advance() *Board {
-	nextBoard := NewBoard(len((*b)[0]), len(*b))
+	nextBoard := NewBoard(len((*b)[0]), len(*b), func(_, _ int) CellState {
+		return Off
+	})
 	for y := range *b {
 		for x := range (*b)[y] {
 			count := b.CountNeighbors(x, y)
