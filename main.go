@@ -4,13 +4,14 @@ import "fmt"
 
 func main() {
 	board := Board{
-		// x
-		// 0   1   2        y
-		{Off, Off, Off}, // 0
-		{On, On, Off},   // 1
-		{Off, On, Off},  // 2
+		{Off, Off, Off, Off},
+		{Off, Off, On, Off},
+		{Off, Off, On, Off},
+		{Off, Off, On, Off},
+		{Off, Off, Off, Off},
 	}
 	board.print()
+	fmt.Print("\n\n")
 	for i := 0; i < 3; i++ {
 		nextBoard := board.advance()
 		nextBoard.print()
@@ -21,11 +22,11 @@ func main() {
 
 type Board [][]CellState
 
-func newBoard(size int) *Board {
-	board := make(Board, size)
-	underlying := make([]CellState, size*size)
-	for x := range board {
-		board[x], underlying = underlying[:size], underlying[size:]
+func NewBoard(xSize, ySize int) *Board {
+	board := make(Board, ySize)
+	underlying := make([]CellState, xSize*ySize)
+	for y := range board {
+		board[y], underlying = underlying[:xSize], underlying[xSize:]
 	}
 	return &board
 }
@@ -39,7 +40,7 @@ func (b *Board) set(x, y int, s CellState) {
 }
 
 func (b *Board) advance() *Board {
-	nextBoard := newBoard(len(*b))
+	nextBoard := NewBoard(len((*b)[0]), len(*b))
 	for y := range *b {
 		for x := range (*b)[y] {
 			count := b.CountNeighbors(x, y)
@@ -50,8 +51,8 @@ func (b *Board) advance() *Board {
 }
 
 func (b *Board) print() {
-	for y := 0; y < len(*b); y++ {
-		for x := 0; x < len((*b)[0]); x++ {
+	for y := range *b {
+		for x := range (*b)[y] {
 			fmt.Printf("%v  ", b.at(x, y))
 		}
 		fmt.Print("\n\n")
@@ -61,8 +62,8 @@ func (b *Board) print() {
 func (b *Board) CountNeighbors(x, y int) int {
 	count := 0
 	// Bound r and c with board edges
-	for xx := max(x-1, 0); xx <= min(x+1, len(*b)-1); xx++ {
-		for yy := max(y-1, 0); yy <= min(y+1, len((*b)[y])-1); yy++ {
+	for xx := max(x-1, 0); xx <= min(x+1, len((*b)[0])-1); xx++ {
+		for yy := max(y-1, 0); yy <= min(y+1, len(*b)-1); yy++ {
 			if xx == x && yy == y {
 				// Given cell, skip
 				continue
