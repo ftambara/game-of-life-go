@@ -6,7 +6,7 @@ import (
 )
 
 type Board struct {
-	states [][]CellState
+	cells  [][]*Cell
 	width  int
 	height int
 }
@@ -15,20 +15,21 @@ func NewBoard(xSize, ySize int, fn func(int, int) CellState) *Board {
 	// Use padding to avoid bounds checking
 	realXSize := xSize + 2
 	realYSize := ySize + 2
-	states := make([][]CellState, realYSize)
-	underlying := make([]CellState, realXSize*realYSize)
-	for y := range states {
-		states[y], underlying = underlying[:realXSize], underlying[realXSize:]
+	cells := make([][]*Cell, realYSize)
+	underlying := make([]*Cell, realXSize*realYSize)
+	for y := range cells {
+		cells[y], underlying = underlying[:realXSize], underlying[realXSize:]
 	}
-	for y := range states {
-		for x := range states[y] {
+	for y := range cells {
+		for x := range cells[y] {
 			if x == 0 || x == realXSize-1 || y == 0 || y == realYSize-1 {
+				cells[y][x] = &Cell{state: Off}
 				continue
 			}
-			states[y][x] = fn(x-1, y-1)
+			cells[y][x] = &Cell{state: fn(x-1, y-1)}
 		}
 	}
-	return &Board{states, xSize, ySize}
+	return &Board{cells, xSize, ySize}
 }
 
 func RandomBoard(xSize, ySize int) *Board {
@@ -40,18 +41,18 @@ func RandomBoard(xSize, ySize int) *Board {
 	})
 }
 
-func (b *Board) at(x, y int) CellState {
-	return b.states[y+1][x+1]
+func (b *Board) at(x, y int) *Cell {
+	return b.cells[y+1][x+1]
 }
 
-func (b *Board) set(x, y int, s CellState) {
-	b.states[y+1][x+1] = s
+func (b *Board) set(x, y int, s *Cell) {
+	b.cells[y+1][x+1] = s
 }
 
 func (b *Board) advance() *Board {
 	nextBoard := NewBoard(b.width, b.height, func(x, y int) CellState {
 		count := b.CountNeighbors(x, y)
-		return next(b.at(x, y), count)
+		return next(b.at(x, y).state, count)
 	})
 	return nextBoard
 }
@@ -72,7 +73,7 @@ func (b *Board) CountNeighbors(x, y int) int {
 			if dx == 0 && dy == 0 {
 				continue
 			}
-			if b.at(x+dx, y+dy) == On {
+			if b.at(x+dx, y+dy).state == On {
 				count++
 			}
 		}
@@ -84,8 +85,8 @@ func (b *Board) Equals(other *Board) bool {
 	if b.width != other.width || b.height != other.height {
 		return false
 	}
-	for y := range b.states {
-		for x := range b.states[y] {
+	for y := range b.cells {
+		for x := range b.cells[y] {
 			if b.at(x, y) != other.at(x, y) {
 				return false
 			}

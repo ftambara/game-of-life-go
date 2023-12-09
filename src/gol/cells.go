@@ -30,3 +30,12 @@ func next(state CellState, neighbor_count int) CellState {
 		}
 	}
 }
+
+type Cell struct {
+	state         CellState
+	neighborCount int
+}
+
+func (c Cell) String() string {
+	return c.state.String()
+}
