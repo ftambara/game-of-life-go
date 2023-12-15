@@ -15,15 +15,15 @@ func (c CellState) String() string {
 	}
 }
 
-func next(state CellState, neighbor_count int) CellState {
-	if state == On {
-		if neighbor_count == 2 || neighbor_count == 3 {
+func (c *Cell) Next() CellState {
+	if c.state == On {
+		if c.neighborCount == 2 || c.neighborCount == 3 {
 			return On
 		} else {
 			return Off
 		}
 	} else {
-		if neighbor_count == 3 {
+		if c.neighborCount == 3 {
 			return On
 		} else {
 			return Off

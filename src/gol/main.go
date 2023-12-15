@@ -23,7 +23,7 @@ func main() {
 	}
 	board := RandomBoard(1000, 1000)
 	for i := 0; i < 20; i++ {
-		nextBoard := board.advance()
+		nextBoard := board.Advance()
 		board = nextBoard
 	}
 }
